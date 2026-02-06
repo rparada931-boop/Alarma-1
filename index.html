@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarma de 30 Minutos - Taller de Andres</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        #timer {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #00ff00;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #d4a373;
+            color: white;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #bc8a5f;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        input[type="file"] {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Alarma Ciclo 30 min</h1>
+        
+        <p>1. Selecciona tu archivo alarma.mp3:</p>
+        <input type="file" id="audioFile" accept="audio/mp3">
+        
+        <div id="timer">30:00</div>
+
+        <div class="controls">
+            <button id="startBtn">Iniciar Alarma</button>
+            <button id="stopBtn" style="background-color: #e63946;">Detener</button>
+        </div>
+        
+        <p id="status" style="margin-top: 20px; color: #aaa;">Estado: Esperando archivo...</p>
+    </div>
+
+    <audio id="alarmSound"></audio>
+
+    <script>
+        let timeLeft = 30 * 60; // 30 minutos en segundos
+        let timerId = null;
+        const timerDisplay = document.getElementById('timer');
+        const audioInput = document.getElementById('audioFile');
+        const alarmSound = document.getElementById('alarmSound');
+        const statusText = document.getElementById('status');
+
+        // Cargar el archivo de audio localmente
+        audioInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                alarmSound.src = url;
+                statusText.innerText = "Estado: Sonido cargado. Listo para iniciar.";
+            }
+        });
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            
+            timerDisplay.innerHTML = `${minutes}:${seconds}`;
+
+            if (timeLeft === 0) {
+                alarmSound.play();
+                timeLeft = 30 * 60; // Reiniciar a 30 minutos automáticamente
+            } else {
+                timeLeft--;
+            }
+        }
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (!alarmSound.src) {
+                alert("Por favor, carga primero un archivo mp3");
+                return;
+            }
+            if (!timerId) {
+                timerId = setInterval(updateTimer, 1000);
+                statusText.innerText = "Estado: Corriendo...";
+            }
+        });
+
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            clearInterval(timerId);
+            timerId = null;
+            timeLeft = 30 * 60;
+            timerDisplay.innerHTML = "30:00";
+            alarmSound.pause();
+            alarmSound.currentTime = 0;
+            statusText.innerText = "Estado: Detenido.";
+        });
+    </script>
+</body>
+</html>
